@@ -1,26 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================
+   Isan Modern Design System — Tailwind v4 Theme
+   Inspired by Northeastern Thai vernacular:
+   warm sandstone, terracotta clay, bronze, ceramic greens
+   ============================================================ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* --- Sand (Neutral/Background) --- */
+  --color-sand-50: #FAF8F5;
+  --color-sand-100: #F0EBE3;
+  --color-sand-200: #E2D9CC;
+  --color-sand-300: #C4B59E;
+  --color-sand-400: #A89A82;
+
+  /* --- Clay (Primary Accent) --- */
+  --color-clay-400: #D4744A;
+  --color-clay-500: #C45C2C;
+  --color-clay-600: #A93638;
+  --color-clay-700: #8B2E2E;
+
+  /* --- Bronze (Income/Positive) --- */
+  --color-bronze-400: #B8912E;
+  --color-bronze-500: #8B6914;
+  --color-bronze-600: #6B5010;
+
+  /* --- Ceramic (Secondary) --- */
+  --color-ceramic-400: #5A7069;
+  --color-ceramic-500: #42554F;
+  --color-ceramic-600: #344440;
+
+  /* --- Ink (Text) --- */
+  --color-ink-600: #524A3A;
+  --color-ink-700: #3D3528;
+  --color-ink-800: #2C2418;
+  --color-ink-900: #1A1510;
+
+  /* --- Semantic Colors --- */
+  --color-success: #4A8B5C;
+  --color-warning: #C4882C;
+  --color-danger: #B83A3A;
+
+  /* --- Fonts --- */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', 'Inter', system-ui, sans-serif;
+
+  /* --- Animations --- */
+  --animate-slide-up: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-down: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-fade-in: fade-in 0.25s ease-out;
+  --animate-scale-pop: scale-pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-count-up: count-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   Keyframes
+   ============================================================ */
+
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slide-down {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes count-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes progress-fill {
+  from { width: 0%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* ============================================================
+   Global Base Styles
+   ============================================================ */
+
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior: none;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-sand-50);
+  color: var(--color-ink-800);
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+}
+
+/* Scrollbar — subtle on mobile */
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-sand-300);
+  border-radius: 10px;
+}
+
+/* Tap highlight — remove on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Input reset for mobile */
+input, select, textarea {
+  font-size: 16px; /* Prevents iOS zoom */
+}
+
+/* Bottom safe area padding utility */
+.pb-safe {
+  padding-bottom: calc(var(--sab) + 1rem);
+}
+
+/* Glass card effect */
+.glass {
+  background: rgba(240, 235, 227, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 217, 204, 0.5);
+}
+
+.glass-strong {
+  background: rgba(250, 248, 245, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 217, 204, 0.6);
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-sand-100) 25%,
+    var(--color-sand-200) 50%,
+    var(--color-sand-100) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* Progress bar animation */
+.progress-fill {
+  animation: progress-fill 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Touch-friendly interaction feedback */
+.touch-active {
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+.touch-active:active {
+  transform: scale(0.97);
+  opacity: 0.8;
 }

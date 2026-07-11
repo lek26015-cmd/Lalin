@@ -133,36 +133,60 @@ export function LiffProvider({ children }: { children: ReactNode }) {
         await liff.init({ liffId });
         setLiffReady(true);
 
-        if (!liff.isLoggedIn()) {
-          liff.login();
-          return;
+        if (liff.isLoggedIn()) {
+          setIsLoggedIn(true);
+
+          const lp = await liff.getProfile();
+          const lineProf: LineProfile = {
+            userId: lp.userId,
+            displayName: lp.displayName,
+            pictureUrl: lp.pictureUrl,
+          };
+          setLineProfile(lineProf);
+
+          const dbProfile = await upsertProfile(lineProf);
+          if (dbProfile) {
+            setProfile(dbProfile);
+          } else {
+            setProfile({
+              id: lp.userId,
+              line_id: lp.userId,
+              name: lp.displayName,
+              display_name: lp.displayName,
+              picture_url: lp.pictureUrl ?? null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            });
+          }
+        } else if (liff.isInClient()) {
+          // Inside LINE app but not logged in — try getting token
+          try {
+            const token = liff.getAccessToken();
+            if (token) {
+              setIsLoggedIn(true);
+              const lp = await liff.getProfile();
+              const lineProf: LineProfile = {
+                userId: lp.userId,
+                displayName: lp.displayName,
+                pictureUrl: lp.pictureUrl,
+              };
+              setLineProfile(lineProf);
+              setProfile({
+                id: lp.userId,
+                line_id: lp.userId,
+                name: lp.displayName,
+                display_name: lp.displayName,
+                picture_url: lp.pictureUrl ?? null,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              });
+            }
+          } catch {
+            console.warn('Could not get profile in LINE client');
+          }
         }
-
-        setIsLoggedIn(true);
-
-        const lp = await liff.getProfile();
-        const lineProf: LineProfile = {
-          userId: lp.userId,
-          displayName: lp.displayName,
-          pictureUrl: lp.pictureUrl,
-        };
-        setLineProfile(lineProf);
-
-        const dbProfile = await upsertProfile(lineProf);
-        if (dbProfile) {
-          setProfile(dbProfile);
-        } else {
-          // Fallback: use LINE profile data if DB upsert failed
-          setProfile({
-            id: lp.userId,
-            line_id: lp.userId,
-            name: lp.displayName,
-            display_name: lp.displayName,
-            picture_url: lp.pictureUrl ?? null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
-        }
+        // If not logged in and not in LINE client, just show the app
+        // without login (guest mode) — no redirect!
       } catch (err) {
         const errObj = err as Error;
         console.error('LIFF init error:', errObj);

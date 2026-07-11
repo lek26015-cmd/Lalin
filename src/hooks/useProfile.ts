@@ -11,6 +11,6 @@ export function useProfile() {
     isLoading,
     isLoggedIn,
     error: liffError,
-    userId: profile?.id ?? null,
+    userId: profile?.id ?? lineProfile?.userId ?? null,
   };
 }

@@ -134,7 +134,7 @@ export function LiffProvider({ children }: { children: ReactNode }) {
         setLiffReady(true);
 
         if (!liff.isLoggedIn()) {
-          liff.login({ redirectUri: window.location.href });
+          liff.login();
           return;
         }
 
@@ -148,13 +148,11 @@ export function LiffProvider({ children }: { children: ReactNode }) {
         };
         setLineProfile(lineProf);
 
-        // Try to upsert profile, but don't block if it fails
-        try {
-          const dbProfile = await upsertProfile(lineProf);
+        const dbProfile = await upsertProfile(lineProf);
+        if (dbProfile) {
           setProfile(dbProfile);
-        } catch (dbErr) {
-          console.warn('Profile upsert failed, using LINE profile:', dbErr);
-          // Create a fallback profile from LINE data
+        } else {
+          // Fallback: use LINE profile data if DB upsert failed
           setProfile({
             id: lp.userId,
             line_id: lp.userId,

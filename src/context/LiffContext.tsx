@@ -9,7 +9,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import liff from '@line/liff';
+import type liff from '@line/liff';
 import { createClient } from '@/lib/supabase/client';
 import type { Profile, LineProfile } from '@/types';
 
@@ -130,13 +130,14 @@ export function LiffProvider({ children }: { children: ReactNode }) {
 
     const initLiff = async () => {
       try {
-        await liff.init({ liffId });
+        const liffModule = (await import('@line/liff')).default;
+        await liffModule.init({ liffId });
         setLiffReady(true);
 
-        if (liff.isLoggedIn()) {
+        if (liffModule.isLoggedIn()) {
           setIsLoggedIn(true);
 
-          const lp = await liff.getProfile();
+          const lp = await liffModule.getProfile();
           const lineProf: LineProfile = {
             userId: lp.userId,
             displayName: lp.displayName,
@@ -158,13 +159,13 @@ export function LiffProvider({ children }: { children: ReactNode }) {
               updated_at: new Date().toISOString(),
             });
           }
-        } else if (liff.isInClient()) {
+        } else if (liffModule.isInClient()) {
           // Inside LINE app but not logged in — try getting token
           try {
-            const token = liff.getAccessToken();
+            const token = liffModule.getAccessToken();
             if (token) {
               setIsLoggedIn(true);
-              const lp = await liff.getProfile();
+              const lp = await liffModule.getProfile();
               const lineProf: LineProfile = {
                 userId: lp.userId,
                 displayName: lp.displayName,
@@ -199,10 +200,13 @@ export function LiffProvider({ children }: { children: ReactNode }) {
     initLiff();
   }, [upsertProfile]);
 
-  const logout = useCallback(() => {
-    if (liffReady && liff.isLoggedIn()) {
-      liff.logout();
-      window.location.reload();
+  const logout = useCallback(async () => {
+    if (liffReady) {
+      const liffModule = (await import('@line/liff')).default;
+      if (liffModule.isLoggedIn()) {
+        liffModule.logout();
+        window.location.reload();
+      }
     }
   }, [liffReady]);
 

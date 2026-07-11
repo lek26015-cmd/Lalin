@@ -134,7 +134,7 @@ export function LiffProvider({ children }: { children: ReactNode }) {
         setLiffReady(true);
 
         if (!liff.isLoggedIn()) {
-          liff.login();
+          liff.login({ redirectUri: window.location.href });
           return;
         }
 
@@ -148,10 +148,26 @@ export function LiffProvider({ children }: { children: ReactNode }) {
         };
         setLineProfile(lineProf);
 
-        const dbProfile = await upsertProfile(lineProf);
-        setProfile(dbProfile);
+        // Try to upsert profile, but don't block if it fails
+        try {
+          const dbProfile = await upsertProfile(lineProf);
+          setProfile(dbProfile);
+        } catch (dbErr) {
+          console.warn('Profile upsert failed, using LINE profile:', dbErr);
+          // Create a fallback profile from LINE data
+          setProfile({
+            id: lp.userId,
+            line_id: lp.userId,
+            name: lp.displayName,
+            display_name: lp.displayName,
+            picture_url: lp.pictureUrl ?? null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+        }
       } catch (err) {
         const errObj = err as Error;
+        console.error('LIFF init error:', errObj);
         setLiffError(errObj?.message || String(err) || 'LIFF init failed');
       } finally {
         setIsLoading(false);
